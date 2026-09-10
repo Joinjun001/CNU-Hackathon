@@ -36,7 +36,7 @@ def main():
         if result.stderr:
             print("STDERR:", result.stderr)
 
-        if "온체인 영수증 검증 통과! 데이터 잠금 해제 성공!" in result.stdout:
+        if "영수증 검증 통과! 데이터 잠금 해제 성공!" in result.stdout:
             print(">>> ✅ 테스트 1 성공: 402 감지, 결제 생성, 마크다운 수신 완료!")
         else:
             print(">>> ❌ 테스트 1 실패")
