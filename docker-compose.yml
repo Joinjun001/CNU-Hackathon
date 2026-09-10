@@ -45,17 +45,6 @@ services:
     networks:
       - word402-network
       - healthcheck_default
-
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    container_name: word402-cloudflared
-    restart: always
-    depends_on:
-      - wordpress
-    networks:
-      - word402-network
-    command: tunnel --no-autoupdate --url http://wordpress:80
-
 volumes:
   db_data:
   wp_data:
