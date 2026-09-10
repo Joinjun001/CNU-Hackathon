@@ -44,6 +44,7 @@ services:
       - ./word402:/var/www/html/wp-content/plugins/word402
     networks:
       - word402-network
+      - healthcheck_default
 
   cloudflared:
     image: cloudflare/cloudflared:latest
@@ -62,3 +63,5 @@ volumes:
 networks:
   word402-network:
     driver: bridge
+  healthcheck_default:
+    external: true

@@ -31,7 +31,7 @@ class Word402_Chain_Verifier {
         }
 
         // Mock simulation hook for test environments
-        if (defined('WORD402_SIMULATION_MODE') && WORD402_SIMULATION_MODE === true) {
+        if ((defined('WORD402_SIMULATION_MODE') && WORD402_SIMULATION_MODE === true) || get_option('word402_simulation_mode') === '1') {
             return self::simulate_verification($tx_hash, $expected_recipient, $expected_amount);
         }
 

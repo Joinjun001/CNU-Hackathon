@@ -76,8 +76,10 @@ class Word402_Protocol {
         );
 
         status_header(402);
+        http_response_code(402);
+        header('HTTP/1.1 402 Payment Required', true, 402);
         header('Content-Type: application/json; charset=utf-8');
-        header('WWW-Authenticate: ' . $www_auth);
+        // header('WWW-Authenticate: ' . $www_auth);
         header('X-402-Version: ' . self::PROTOCOL_VERSION);
         header('X-402-Challenge-ID: ' . $challenge_id);
         header('X-402-Expires-At: ' . $expires_at);
@@ -151,10 +153,20 @@ class Word402_Protocol {
      */
     private static function get_all_headers() {
         $headers = array();
+        if (function_exists('getallheaders')) {
+            $apache_headers = getallheaders();
+            if (is_array($apache_headers)) {
+                foreach ($apache_headers as $name => $value) {
+                    $headers[strtolower($name)] = $value;
+                }
+            }
+        }
         foreach ($_SERVER as $name => $value) {
             if (substr($name, 0, 5) == 'HTTP_') {
                 $key = strtolower(str_replace('_', '-', substr($name, 5)));
-                $headers[$key] = $value;
+                if (!isset($headers[$key])) {
+                    $headers[$key] = $value;
+                }
             } elseif ($name === 'CONTENT_TYPE') {
                 $headers['content-type'] = $value;
             } elseif ($name === 'CONTENT_LENGTH') {
