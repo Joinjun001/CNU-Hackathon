@@ -11,111 +11,11 @@ if (!defined('ABSPATH')) {
 class Word402_Public {
 
     public function init() {
-        // Append on-chain proof badge to post content
-        add_filter('the_content', array($this, 'render_post_purchase_badge'), 99);
-
         // Register shortcode [word402_ledger]
         add_shortcode('word402_ledger', array($this, 'render_public_ledger_shortcode'));
 
         // Virtual page / standalone query handler (?word402_ledger=1)
         add_action('template_redirect', array($this, 'handle_standalone_ledger_page'), 5);
-    }
-
-    /**
-     * Render On-Chain Proof of Purchase Badge at the bottom of post content
-     */
-    public function render_post_purchase_badge($content) {
-        if (!is_singular('post') || is_admin() || !in_the_loop() || !is_main_query()) {
-            return $content;
-        }
-
-        $post_id = get_the_ID();
-        if (!$post_id) {
-            return $content;
-        }
-
-        $price_info = Word402_DB::get_post_price_info($post_id);
-        $settled_count = Word402_DB::get_post_settled_count($post_id);
-        $receipts = Word402_DB::get_post_receipts($post_id, 3);
-
-        // If post is not protected and has no purchases, don't show badge
-        if (!$price_info['is_enabled'] && $settled_count === 0) {
-            return $content;
-        }
-
-        $ledger_url = home_url('/ledger/');
-        $html = '';
-
-        if ($settled_count > 0 && !empty($receipts)) {
-            $latest = $receipts[0];
-            $short_tx = substr($latest->tx_hash, 0, 10) . '...' . substr($latest->tx_hash, -8);
-            $short_payer = substr($latest->payer_address, 0, 8) . '...' . substr($latest->payer_address, -6);
-            $basescan_url = 'https://sepolia.basescan.org/tx/' . esc_attr($latest->tx_hash);
-
-            $html .= '<div class="word402-proof-card">';
-            $html .= '  <div class="word402-card-header">';
-            $html .= '    <div class="word402-badge-left">';
-            $html .= '      <span class="word402-shield-icon">🛡️</span>';
-            $html .= '      <strong>Word402 온체인 결제 인증</strong>';
-            $html .= '      <span class="word402-tag-verified">Verified AI Purchase</span>';
-            $html .= '    </div>';
-            $html .= '    <div class="word402-badge-right">';
-            $html .= '      <span class="word402-pulse-dot"></span>';
-            $html .= '      <span>Base Sepolia L2 (84532)</span>';
-            $html .= '    </div>';
-            $html .= '  </div>';
-
-            $html .= '  <div class="word402-card-body">';
-            $html .= '    <p class="word402-desc">본 콘텐츠는 자율 AI 에이전트(머신)에 의해 <strong>HTTP 402 프로토콜</strong>을 거쳐 블록체인에 영구 기록된 유료 정산 데이터입니다. (누적 결제: <strong>' . $settled_count . '건</strong>)</p>';
-            
-            $html .= '    <div class="word402-meta-grid">';
-            $html .= '      <div class="word402-meta-item">';
-            $html .= '        <span class="word402-label">최근 트랜잭션 해시</span>';
-            $html .= '        <a href="' . $basescan_url . '" target="_blank" rel="noopener noreferrer" class="word402-tx-link"><code>' . esc_html($short_tx) . '</code> &#x2197;</a>';
-            $html .= '      </div>';
-            $html .= '      <div class="word402-meta-item">';
-            $html .= '        <span class="word402-label">확정 블록 번호</span>';
-            $html .= '        <span class="word402-value"><code>#' . esc_html($latest->block_number) . '</code></span>';
-            $html .= '      </div>';
-            $html .= '      <div class="word402-meta-item">';
-            $html .= '        <span class="word402-label">구매 에이전트 지갑</span>';
-            $html .= '        <span class="word402-value"><code>' . esc_html($short_payer) . '</code></span>';
-            $html .= '      </div>';
-            $html .= '      <div class="word402-meta-item">';
-            $html .= '        <span class="word402-label">정산 금액</span>';
-            $html .= '        <span class="word402-amount">+' . esc_html($latest->settled_amount) . ' USDC</span>';
-            $html .= '      </div>';
-            $html .= '    </div>';
-            $html .= '  </div>';
-
-            $html .= '  <div class="word402-card-footer">';
-            $html .= '    <span class="word402-footer-note">⚡ 정산 완료: ' . esc_html($latest->settled_at) . '</span>';
-            $html .= '    <a href="' . esc_url($ledger_url) . '" class="word402-footer-link">전체 AI 결제 원장 보기 &rarr;</a>';
-            $html .= '  </div>';
-            $html .= '</div>';
-        } else {
-            // Post has paywall enabled but 0 purchases yet
-            $html .= '<div class="word402-proof-card word402-ready-card">';
-            $html .= '  <div class="word402-card-header">';
-            $html .= '    <div class="word402-badge-left">';
-            $html .= '      <span class="word402-shield-icon">🔒</span>';
-            $html .= '      <strong>Word402 AI 자율 결제 게이트웨이 활성화</strong>';
-            $html .= '    </div>';
-            $html .= '    <div class="word402-badge-right">';
-            $html .= '      <span>단가: ' . esc_html($price_info['price']) . ' USDC</span>';
-            $html .= '    </div>';
-            $html .= '  </div>';
-            $html .= '  <div class="word402-card-body">';
-            $html .= '    <p class="word402-desc">이 글은 AI 에이전트(Perplexity, ChatGPT 등)가 크롤링할 때 <strong>HTTP 402 결제 요구</strong>를 반환하며, Base Sepolia USDC 결제 시 정제 Markdown 본문을 공급합니다.</p>';
-            $html .= '  </div>';
-            $html .= '  <div class="word402-card-footer">';
-            $html .= '    <span class="word402-footer-note">엔드포인트: <code>/wp-json/word402/v1/posts/' . $post_id . '</code></span>';
-            $html .= '    <a href="' . esc_url($ledger_url) . '" class="word402-footer-link">전체 AI 결제 원장 보기 &rarr;</a>';
-            $html .= '  </div>';
-            $html .= '</div>';
-        }
-
-        return $content . $this->get_badge_styles() . $html;
     }
 
     /**
@@ -172,18 +72,18 @@ class Word402_Public {
                 <table class="word402-ledger-table">
                     <thead>
                         <tr>
-                            <th style="width:160px;">정산 완료 일시</th>
-                            <th>트랜잭션 해시 (Tx Hash)</th>
-                            <th>대상 포스트</th>
-                            <th>구매자 에이전트 지갑</th>
-                            <th style="width:110px;">결제 금액</th>
-                            <th style="width:110px;">블록 번호</th>
+                            <th class="word402-col-date">정산 완료 일시</th>
+                            <th class="word402-col-tx">트랜잭션 해시 (Tx Hash)</th>
+                            <th class="word402-col-post">대상 포스트</th>
+                            <th class="word402-col-wallet">구매자 에이전트 지갑</th>
+                            <th class="word402-col-amount">결제 금액</th>
+                            <th class="word402-col-block">블록 번호</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($receipts)) : ?>
                             <tr>
-                                <td colspan="6" style="text-align:center; padding:35px; color:#94a3b8;">
+                                <td colspan="6" style="text-align:center; padding:40px; color:#94a3b8;">
                                     기록된 온체인 결제 내역이 없습니다.
                                 </td>
                             </tr>
@@ -195,22 +95,20 @@ class Word402_Public {
                                     $basescan_url = 'https://sepolia.basescan.org/tx/' . esc_attr($r->tx_hash);
                                 ?>
                                 <tr>
-                                    <td><small><?php echo esc_html($r->settled_at); ?></small></td>
-                                    <td>
+                                    <td class="word402-col-date"><?php echo esc_html($r->settled_at); ?></td>
+                                    <td class="word402-col-tx">
                                         <a href="<?php echo $basescan_url; ?>" target="_blank" rel="noopener noreferrer" class="word402-tx-link">
                                             <code><?php echo esc_html($short_tx); ?></code> &#x2197;
                                         </a>
                                     </td>
-                                    <td>
-                                        <strong>
-                                            <a href="<?php echo get_permalink($r->post_id); ?>">
-                                                <?php echo esc_html($r->post_title ? $r->post_title : '포스트 #' . $r->post_id); ?>
-                                            </a>
-                                        </strong>
+                                    <td class="word402-col-post">
+                                        <a href="<?php echo get_permalink($r->post_id); ?>">
+                                            <?php echo esc_html($r->post_title ? $r->post_title : '포스트 #' . $r->post_id); ?>
+                                        </a>
                                     </td>
-                                    <td><code><?php echo esc_html($short_payer); ?></code></td>
-                                    <td><strong class="word402-amount">+<?php echo esc_html($r->settled_amount); ?> USDC</strong></td>
-                                    <td><span class="word402-block-tag">#<?php echo esc_html($r->block_number); ?></span></td>
+                                    <td class="word402-col-wallet"><code><?php echo esc_html($short_payer); ?></code></td>
+                                    <td class="word402-col-amount">+<?php echo esc_html($r->settled_amount); ?> USDC</td>
+                                    <td class="word402-col-block"><span class="word402-block-tag">#<?php echo esc_html($r->block_number); ?></span></td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
@@ -232,140 +130,12 @@ class Word402_Public {
     public function handle_standalone_ledger_page() {
         if (isset($_GET['word402_ledger']) && $_GET['word402_ledger'] === '1') {
             get_header();
-            echo '<div style="max-width:1140px; margin:40px auto; padding:0 20px;">';
+            echo '<div style="max-width:1440px; width:94vw; margin:40px auto; padding:0 20px; box-sizing:border-box;">';
             echo $this->render_public_ledger_shortcode(array('limit' => 50));
             echo '</div>';
             get_footer();
             exit;
         }
-    }
-
-    /**
-     * Styles for Post Purchase Badge
-     */
-    private function get_badge_styles() {
-        return '
-        <style>
-        .word402-proof-card {
-            margin: 35px 0 20px 0;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            border-radius: 14px;
-            padding: 22px;
-            color: #f8fafc;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
-        .word402-ready-card {
-            border-color: rgba(148, 163, 184, 0.3);
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-        }
-        .word402-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            padding-bottom: 14px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .word402-badge-left {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 15px;
-        }
-        .word402-tag-verified {
-            background: rgba(16, 185, 129, 0.2);
-            color: #34d399;
-            border: 1px solid rgba(16, 185, 129, 0.4);
-            padding: 2px 8px;
-            border-radius: 9999px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .word402-badge-right {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12px;
-            color: #94a3b8;
-        }
-        .word402-pulse-dot {
-            width: 8px;
-            height: 8px;
-            background-color: #10b981;
-            border-radius: 50%;
-            display: inline-block;
-            box-shadow: 0 0 8px #10b981;
-        }
-        .word402-card-body {
-            padding: 15px 0;
-        }
-        .word402-desc {
-            font-size: 13.5px;
-            line-height: 1.6;
-            color: #cbd5e1;
-            margin: 0 0 14px 0 !important;
-        }
-        .word402-meta-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 12px;
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 10px;
-            padding: 12px 16px;
-        }
-        .word402-meta-item {
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-        }
-        .word402-label {
-            font-size: 11px;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .word402-tx-link {
-            color: #60a5fa !important;
-            text-decoration: none !important;
-            font-size: 12.5px;
-            font-weight: 500;
-        }
-        .word402-tx-link:hover {
-            text-decoration: underline !important;
-        }
-        .word402-value {
-            font-size: 12.5px;
-            color: #e2e8f0;
-        }
-        .word402-amount {
-            color: #34d399;
-            font-weight: 700;
-            font-size: 13px;
-        }
-        .word402-card-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 12px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-            color: #94a3b8;
-        }
-        .word402-footer-link {
-            color: #38bdf8 !important;
-            text-decoration: none !important;
-            font-weight: 500;
-        }
-        .word402-footer-link:hover {
-            text-decoration: underline !important;
-        }
-        </style>';
     }
 
     /**
@@ -377,27 +147,53 @@ class Word402_Public {
         .word402-public-ledger {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             color: #1e293b;
-            margin: 20px 0;
+            margin-top: 30px;
+            margin-bottom: 50px;
+            width: 94vw;
+            max-width: 1440px;
+            margin-left: calc(50% - 47vw);
+            margin-right: calc(50% - 47vw);
+            box-sizing: border-box;
+            padding: 0 16px;
+        }
+        /* Break out from WordPress block theme constrained widths */
+        .entry-content .word402-public-ledger,
+        .is-layout-constrained > .word402-public-ledger,
+        .wp-block-post-content .word402-public-ledger,
+        .alignwide .word402-public-ledger {
+            max-width: 1440px !important;
+            width: 94vw !important;
         }
         .word402-ledger-header {
             margin-bottom: 25px;
         }
         .word402-ledger-header h2 {
-            font-size: 26px;
-            font-weight: 700;
+            font-size: 28px;
+            font-weight: 800;
             margin-bottom: 8px;
             color: #0f172a;
+            letter-spacing: -0.5px;
         }
         .word402-ledger-header p {
             color: #64748b;
-            font-size: 14.5px;
+            font-size: 15px;
             line-height: 1.6;
         }
         .word402-stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 16px;
             margin-bottom: 28px;
+        }
+        @media (max-width: 992px) {
+            .word402-stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 576px) {
+            .word402-stats-grid {
+                grid-template-columns: 1fr;
+            }
         }
         .word402-stat-card {
             background: #ffffff;
@@ -417,7 +213,7 @@ class Word402_Public {
             letter-spacing: 0.5px;
         }
         .word402-stat-value {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 700;
             color: #0f172a;
         }
@@ -434,25 +230,28 @@ class Word402_Public {
             border-radius: 12px;
             overflow-x: auto;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            -webkit-overflow-scrolling: touch;
         }
         .word402-ledger-table {
             width: 100%;
+            min-width: 960px;
             border-collapse: collapse;
             text-align: left;
             font-size: 13.5px;
         }
         .word402-ledger-table th {
             background: #f8fafc;
-            padding: 14px 16px;
+            padding: 14px 18px;
             color: #475569;
             font-weight: 600;
             font-size: 12.5px;
             border-bottom: 1px solid #e2e8f0;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            white-space: nowrap;
         }
         .word402-ledger-table td {
-            padding: 14px 16px;
+            padding: 14px 18px;
             border-bottom: 1px solid #f1f5f9;
             color: #334155;
             vertical-align: middle;
