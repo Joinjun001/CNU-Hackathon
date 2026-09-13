@@ -15,6 +15,7 @@
 * **대회명**: BLOCK AI * 26 (Web3 시대의 블록체인 AI 융합 해커톤)
 * **참가 트랙**: **트랙 02. 블록체인 + 데이터 마켓플레이스**
 * **실시간 배포 사이트**: [https://injun-cloud.duckdns.org](https://injun-cloud.duckdns.org)
+* **실시간 공개 온체인 원장 (Live Ledger)**: [https://injun-cloud.duckdns.org/ledger/](https://injun-cloud.duckdns.org/ledger/)
 * **온체인 실증 증거 (Basescan)**: [Tx: 0x719f3cd4... (Block #46761373)](https://sepolia.basescan.org/tx/0x719f3cd4ed73d0237825cde2c3d76b87f27217df72c8a1e47f553e4fab549a9f)
 
 ---

@@ -183,6 +183,31 @@ class Word402_DB {
     }
 
     /**
+     * Analytics: Get Recent Receipts for a Specific Post
+     */
+    public static function get_post_receipts($post_id, $limit = 5) {
+        global $wpdb;
+        $table_receipts = $wpdb->prefix . 'x402_receipts';
+        return $wpdb->get_results($wpdb->prepare(
+            "SELECT * FROM $table_receipts WHERE post_id = %d ORDER BY settled_at DESC LIMIT %d",
+            $post_id,
+            $limit
+        ));
+    }
+
+    /**
+     * Analytics: Get Settled Count for a Specific Post
+     */
+    public static function get_post_settled_count($post_id) {
+        global $wpdb;
+        $table_receipts = $wpdb->prefix . 'x402_receipts';
+        return (int)$wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(1) FROM $table_receipts WHERE post_id = %d",
+            $post_id
+        ));
+    }
+
+    /**
      * Daily Cron cleanup for expired pending challenges
      */
     public static function cleanup_expired_challenges() {

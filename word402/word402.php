@@ -26,6 +26,7 @@ require_once WORD402_PLUGIN_DIR . 'includes/class-word402-chain-verifier.php';
 require_once WORD402_PLUGIN_DIR . 'includes/class-word402-content-filter.php';
 require_once WORD402_PLUGIN_DIR . 'includes/class-word402-protocol.php';
 require_once WORD402_PLUGIN_DIR . 'includes/class-word402-interceptor.php';
+require_once WORD402_PLUGIN_DIR . 'includes/class-word402-public.php';
 
 // Include Admin Classes if in admin context
 if (is_admin()) {
@@ -46,6 +47,10 @@ function word402_init() {
     // Initialize Interceptor (REST API & Frontend Hooks)
     $interceptor = new Word402_Interceptor();
     $interceptor->init();
+
+    // Initialize Public-facing Badges and Shortcodes
+    $public = new Word402_Public();
+    $public->init();
 
     // Initialize Admin
     if (is_admin()) {
