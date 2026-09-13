@@ -145,7 +145,7 @@ CNU-Hackathon/
 
 ## 📚 8. 참고자료 및 레퍼런스 (References & External Links)
 
-본 프로젝트 연구 및 개발 과정에서 참고한 웹 크롤링 통계, AI 트래픽 모네타이제이션 및 x402/MPP 프로토콜 공식 표준 레퍼런스 목록입니다:
+본 프로젝트 연구 및 개발 과정에서 참고한 레퍼런스 목록입니다:
 
 * **x402 프로토콜 공식 규격**: [https://x402.org/](https://x402.org/) (Coinbase 파트너십 x402 표준 Specification)
 * **x402 온체인 익스플로러**: [https://www.x402scan.com/](https://www.x402scan.com/) (x402 프로토콜 트랜잭션 스캔 탐색기)
