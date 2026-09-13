@@ -141,9 +141,19 @@ CNU-Hackathon/
 
 ---
 
-## 👥 8. 프로젝트 정보
-* **프로젝트명**: Word402 (CNU Hackathon 2026)
-* **주관/주최**: 교육부, NRF 한국연구재단, COSS 혁신융합대학, 충남대학교, ICOBC, KISA, AhnLab Blockchain Company
-* **라이선스**: MIT License
+
+
+## 📚 8. 참고자료 및 레퍼런스 (References & External Links)
+
+본 프로젝트 연구 및 개발 과정에서 참고한 웹 크롤링 통계, AI 트래픽 모네타이제이션 및 x402/MPP 프로토콜 공식 표준 레퍼런스 목록입니다:
+
+* **x402 프로토콜 공식 규격**: [https://x402.org/](https://x402.org/) (Coinbase 파트너십 x402 표준 Specification)
+* **x402 온체인 익스플로러**: [https://www.x402scan.com/](https://www.x402scan.com/) (x402 프로토콜 트랜잭션 스캔 탐색기)
+* **Micro Payment Protocol (MPP)**: [https://mpp.dev/](https://mpp.dev/) (마이크로 페이먼트 프로토콜 개발자 문서)
+* **MPP Scan**: [https://mppscan.com/](https://mppscan.com/) (MPP 익스플로러)
+* **Cloudflare Monetization Gateway**: [https://blog.cloudflare.com/monetization-gateway/](https://blog.cloudflare.com/monetization-gateway/) (Cloudflare AI 콘텐츠 수익화 블로그)
+* **웹 크롤링 통계 & 벤치마크**: [https://thunderbit.com/ko/blog/web-crawling-stats-and-industry-benchmarks](https://thunderbit.com/ko/blog/web-crawling-stats-and-industry-benchmarks) (웹 데이터 크롤링 트래픽 벤치마크 리포트)
+* **AI 데이터 경제 & 유료화 동향**: [https://www.techflowpost.com/ko/article/33882](https://www.techflowpost.com/ko/article/33882) (AI 에이전트 시대 데이터 마켓 아티클)
+
 
 
