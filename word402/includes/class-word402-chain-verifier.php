@@ -30,11 +30,6 @@ class Word402_Chain_Verifier {
             );
         }
 
-        // Mock simulation hook for test environments
-        if ((defined('WORD402_SIMULATION_MODE') && WORD402_SIMULATION_MODE === true) || get_option('word402_simulation_mode') === '1') {
-            return self::simulate_verification($tx_hash, $expected_recipient, $expected_amount);
-        }
-
         $rpc_url = get_option('word402_rpc_url', 'https://sepolia.base.org');
         $expected_usdc = strtolower(get_option('word402_usdc_contract', '0x036CbD53842c5426634e7929541eC2318f3dCF7e'));
 
@@ -160,23 +155,5 @@ class Word402_Chain_Verifier {
         }
 
         return null;
-    }
-
-    /**
-     * Simulation helper for testing environments
-     */
-    private static function simulate_verification($tx_hash, $expected_recipient, $expected_amount) {
-        return array(
-            'success' => true,
-            'code'    => 'VERIFIED_SIMULATION',
-            'message' => 'Simulated test verification successful.',
-            'data'    => array(
-                'tx_hash'           => $tx_hash,
-                'payer_address'     => '0xAgentSimulatedWalletAddress12345678901234',
-                'recipient_address' => $expected_recipient,
-                'settled_amount'    => (float)$expected_amount,
-                'block_number'      => 12345678
-            )
-        );
     }
 }

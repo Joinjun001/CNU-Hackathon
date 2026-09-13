@@ -67,44 +67,31 @@ ERC20_TRANSFER_ABI = [
 ]
 
 class Word402Agent:
-    def __init__(self, target_url, private_key=None, rpc_url=None, simulate=False):
+    def __init__(self, target_url, private_key=None, rpc_url=None):
         self.target_url = target_url
         self.private_key = private_key.strip() if private_key else None
         if self.private_key and not self.private_key.startswith("0x"):
             self.private_key = "0x" + self.private_key
 
         self.rpc_url = rpc_url or os.getenv("RPC_URL", "https://sepolia.base.org")
-        self.simulate = simulate
         self.headers = {
             "User-Agent": "Word402-Autonomous-Agent/1.0",
             "Accept": "text/markdown, application/json"
         }
 
-        # Initialize Web3 Keyring if in Live Mode
-        if not self.simulate:
-            if not WEB3_AVAILABLE:
-                self.log("ERROR", "❌ 실제 온체인 결제(Live Mode)를 실행하려면 'web3' 모듈이 필요합니다.", "\033[31m")
-                self.log("TIP", "👉 터미널에서 'pip install web3' 명령어로 설치해 주세요.", "\033[33m")
-                self.log("FALLBACK", "⚠️ web3 부재로 인해 시뮬레이션 모드로 전환합니다.", "\033[33m")
-                self.simulate = True
-                self.w3 = None
-                self.account = None
-                self.agent_address = "0xAgentSimulatedWalletAddress12345678901234"
-            elif not self.private_key:
-                self.log("ERROR", "❌ 온체인 트랜잭션 서명을 위한 에이전트 개인키(--key 또는 .env의 AGENT_PRIVATE_KEY)가 없습니다.", "\033[31m")
-                self.log("FALLBACK", "⚠️ 개인키 부재로 인해 시뮬레이션 모드로 전환합니다.", "\033[33m")
-                self.simulate = True
-                self.w3 = None
-                self.account = None
-                self.agent_address = "0xAgentSimulatedWalletAddress12345678901234"
-            else:
-                self.w3 = Web3(Web3.HTTPProvider(self.rpc_url))
-                self.account = Account.from_key(self.private_key)
-                self.agent_address = self.account.address
-        else:
-            self.w3 = None
-            self.account = None
-            self.agent_address = os.getenv("AGENT_WALLET_ADDRESS", "0xAgentSimulatedWalletAddress12345678901234")
+        # Initialize Web3 Keyring
+        if not WEB3_AVAILABLE:
+            self.log("ERROR", "❌ 실제 온체인 결제를 실행하려면 'web3' 모듈이 필요합니다.", "\033[31m")
+            self.log("TIP", "👉 터미널에서 'pip install web3' 명령어로 설치해 주세요.", "\033[33m")
+            sys.exit(1)
+
+        if not self.private_key:
+            self.log("ERROR", "❌ 온체인 트랜잭션 서명을 위한 에이전트 개인키(--key 또는 .env의 AGENT_PRIVATE_KEY)가 필요합니다.", "\033[31m")
+            sys.exit(1)
+
+        self.w3 = Web3(Web3.HTTPProvider(self.rpc_url))
+        self.account = Account.from_key(self.private_key)
+        self.agent_address = self.account.address
 
     def log(self, tag, message, color="\033[0m"):
         print(f"{color}[{tag}]\033[0m {message}")
@@ -124,9 +111,7 @@ class Word402Agent:
 
     def run(self):
         print("\n" + "=" * 65)
-        mode_label = "⚡ [시뮬레이션 가상 결제 모드]" if self.simulate else "🌐 [실제 Base Sepolia 온체인 결제 모드]"
-        mode_color = "\033[1;36m" if self.simulate else "\033[1;32m"
-        self.log("MODE", mode_label, mode_color)
+        self.log("MODE", "🌐 [Base Sepolia 온체인 결제 모드]", "\033[1;32m")
         self.log("AGENT", f"🤖 자율 AI 에이전트 가동 시작 (Agent Address: {self.agent_address})", "\033[1;36m")
         self.log("TARGET", f"🔗 데이터 리소스 접근 시도: {self.target_url}", "\033[1;34m")
         print("=" * 65 + "\n")
@@ -183,11 +168,8 @@ class Word402Agent:
             self.log("ERROR", "결제 트랜잭션 전송에 실패했습니다.", "\033[31m")
             return False
 
-        if not self.simulate:
-            self.log("PAYMENT", f"🚀 온체인 트랜잭션 전송 완료! TX HASH: {tx_hash}", "\033[1;32m")
-            self.log("EXPLORER", f"🔍 Basescan 실시간 조회: https://sepolia.basescan.org/tx/{tx_hash}", "\033[1;34m")
-        else:
-            self.log("PAYMENT", f"🚀 가상 트랜잭션 해시 생성 완료: {tx_hash}", "\033[1;32m")
+        self.log("PAYMENT", f"🚀 온체인 트랜잭션 전송 완료! TX HASH: {tx_hash}", "\033[1;32m")
+        self.log("EXPLORER", f"🔍 Basescan 실시간 조회: https://sepolia.basescan.org/tx/{tx_hash}", "\033[1;34m")
 
         # Step 4: Resubmit with Proof
         self.log("RETRY", "3단계: X-Payment 헤더에 결제 영수증을 첨부하여 재요청...", "\033[33m")
@@ -211,7 +193,7 @@ class Word402Agent:
             print("=" * 65)
             self.print_content(retry_body)
 
-            # Simulated Agent Intelligence: Auto Summary
+            # AI Agent: Auto Summary
             print("\n" + "=" * 65)
             self.log("AI AGENT", "🧠 획득한 데이터를 바탕으로 실시간 요약 브리핑 생성:", "\033[1;35m")
             print("=" * 65)
@@ -224,12 +206,6 @@ class Word402Agent:
             return False
 
     def execute_payment(self, recipient, amount, usdc_contract, challenge_id):
-        if self.simulate or not self.private_key or not WEB3_AVAILABLE:
-            self.log("SIM", "⚡ [시뮬레이션 모드] 가상 온체인 트랜잭션 해시를 생성합니다.", "\033[36m")
-            time.sleep(1.0)
-            mock_hash = "0x" + os.urandom(32).hex()
-            return mock_hash
-
         try:
             self.log("WEB3", f"온체인 노드({self.rpc_url})에 트랜잭션 준비 중...", "\033[34m")
             usdc = self.w3.eth.contract(address=Web3.to_checksum_address(usdc_contract), abi=ERC20_TRANSFER_ABI)
@@ -272,7 +248,8 @@ class Word402Agent:
 
             signed_tx = self.w3.eth.account.sign_transaction(tx, private_key=self.private_key)
             self.log("WEB3", f"🚀 Base Sepolia 노드로 서명된 트랜잭션 브로드캐스팅 중...", "\033[34m")
-            tx_hash_bytes = self.w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+            raw_tx = getattr(signed_tx, "raw_transaction", getattr(signed_tx, "rawTransaction", None))
+            tx_hash_bytes = self.w3.eth.send_raw_transaction(raw_tx)
             tx_hash = self.w3.to_hex(tx_hash_bytes)
 
             self.log("WEB3", f"⏳ 블록체인 블록 확정(Finality) 대기 중 (Base L2 약 2~3초)...", "\033[34m")
@@ -312,40 +289,17 @@ if __name__ == "__main__":
         help="Base Sepolia RPC Endpoint"
     )
     
-    mode_group = parser.add_mutually_exclusive_group()
-    mode_group.add_argument(
+    parser.add_argument(
         "--live", 
         action="store_true", 
-        help="실제 Base Sepolia 온체인 결제 모드 (Basescan 트랜잭션 생성)"
-    )
-    mode_group.add_argument(
-        "--simulate", 
-        action="store_true", 
-        help="시뮬레이션 모드 (가상 해시 생성, 토큰 불필요)"
+        help="Base Sepolia 온체인 결제 모드 (기본값)"
     )
 
     args = parser.parse_args()
 
-    # Determine simulation mode
-    if args.simulate:
-        simulate_flag = True
-    elif args.live:
-        simulate_flag = False
-    else:
-        # Default smart resolution:
-        # If .env has SIMULATION_MODE=false or AGENT_PRIVATE_KEY exists and web3 is available, use live!
-        env_sim = os.getenv("SIMULATION_MODE", "").lower()
-        if env_sim in ("false", "0", "no"):
-            simulate_flag = False
-        elif args.key and WEB3_AVAILABLE:
-            simulate_flag = False
-        else:
-            simulate_flag = True
-
     agent = Word402Agent(
         target_url=args.url,
         private_key=args.key,
-        rpc_url=args.rpc,
-        simulate=simulate_flag
+        rpc_url=args.rpc
     )
     agent.run()

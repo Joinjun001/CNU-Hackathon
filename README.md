@@ -1,7 +1,7 @@
 # 🚀 Word402 (CNU Hackathon)
 
 > **워드프레스용 x402 프로토콜 기반 AI 에이전트 대상 유료 콘텐츠 공급 게이트웨이 & 자율 결제 에이전트**  
-> *"AI 에이전트를 차단하지 말고, 1원 단위로 판매하라."*
+> *"AI 에이전트를 차단하지 말고, 초소액으로 판매하라."*
 
 ---
 
@@ -57,20 +57,15 @@ AI 에이전트(`agent-client/agent.py`)는 대상 글을 감지하고, HTTP 402
 source venv/bin/activate
 ```
 
-### 3.2. 시뮬레이션 모드 테스트 (가스비/토큰 불필요)
-```bash
-# 8번 포스트(충남대 테스트용 글 추가 2) 대상 테스트
-python3 agent-client/agent.py --url http://localhost:8080/wp-json/word402/v1/posts/8 --simulate
+### 3.2. 온체인 실전 결제 실행 (Base Sepolia 라이브 트랜잭션)
+에이전트가 402 페이월을 감지하고, Base Sepolia 블록체인에 실제 USDC 결제 트랜잭션을 전송한 뒤 본문을 획득합니다.
 
-# 외부 도메인 대상 테스트
-python3 agent-client/agent.py --url https://injun-cloud.duckdns.org/wp-json/word402/v1/posts/8 --simulate
-```
-
-### 3.3. 온체인 실전 결제 테스트 (Base Sepolia 라이브 트랜잭션)
 ```bash
-python3 agent-client/agent.py \
-  --url https://injun-cloud.duckdns.org/wp-json/word402/v1/posts/8 \
-  --key $AGENT_PRIVATE_KEY
+# 기본 실행 (.env에 설정된 AGENT_PRIVATE_KEY 및 엔드포인트 자동 로드)
+python3 agent-client/agent.py
+
+# 특정 포스트 지정 실행
+python3 agent-client/agent.py --url https://injun-cloud.duckdns.org/wp-json/word402/v1/posts/8
 ```
 
 ---
