@@ -16,6 +16,7 @@
 * **참가 트랙**: **트랙 02. 블록체인 + 데이터 마켓플레이스**
 * **배포 사이트**: [https://injun-cloud.duckdns.org](https://injun-cloud.duckdns.org)
 * **공개 온체인 원장 (Live Ledger)**: [https://injun-cloud.duckdns.org/ledger/](https://injun-cloud.duckdns.org/ledger/)
+* **시연 영상 (YouTube Demo)**: [https://www.youtube.com/watch?v=Cwa3BDvchQc](https://www.youtube.com/watch?v=Cwa3BDvchQc)
 
 ---
 
@@ -77,6 +78,7 @@ sequenceDiagram
 
 Word402는 단순 목업이나 이론적 설계에 그치지 않고, **실제 Base Sepolia L2 블록체인 상에서 실제 USDC 전송 및 실시간 RPC 검증을 100% 성공적으로 완결**했습니다.
 
+* **🎬 시연 영상 (YouTube Demo)**: [https://www.youtube.com/watch?v=Cwa3BDvchQc](https://www.youtube.com/watch?v=Cwa3BDvchQc)
 * **실시간 온체인 TX HASH**: [`0x719f3cd4ed73d0237825cde2c3d76b87f27217df72c8a1e47f553e4fab549a9f`](https://sepolia.basescan.org/tx/0x719f3cd4ed73d0237825cde2c3d76b87f27217df72c8a1e47f553e4fab549a9f) (Block #46761373)
 * **결제 정산 내역**: `0.005 USDC` (구매자: `0xb045FD...b0D999` ➔ 판매자: `0xf49FA4...784FdD`)
 
